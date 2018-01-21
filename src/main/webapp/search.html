@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="jquery-3.1.0.min.js"></script>
+<script type="text/javascript">
+
+	function  clickQuery(typeName){
+		var foodName=$("input[name='keyWord']").val();
+		$.ajax({
+			url : 'searchByCondition',
+			data : "foodName="+ foodName+"&typeName="+typeName,
+			dataType : 'json',
+			success : function(jd) {
+				$("div[name='c']").remove();
+				for (var i = 0; i < jd.length; i++) {
+					var html = "<div name='c'>" + "   <h3>"
+							+ jd[i].foodName+"("+jd[i].typeName+")"+  "</h3> " + "<span>"
+							+ jd[i].foodName + "价格是：" + jd[i].price
+							+ "</span>" + "<hr>" + "</div>";
+					$("#foodDiv").append(html);
+				}
+			}
+		})
+	}
+
+
+	$(function() {
+		//获取文本框的位置
+		var inputObj=$("input[name='keyWord']")
+		var X=inputObj.offset().left;
+		var Y=inputObj.offset().top;
+		//设置div的位置
+		var divY=Y+inputObj.height();
+		var showDiv=$("#showDiv").offset({ top: divY, left: X });
+		//当文本框获取焦点时显示div
+		inputObj.bind("input",function(){
+			$("#showDiv").show();
+			$.ajax({
+				url : 'facetFood',
+				data : 'keyWord=' + inputObj.val(),
+				dataType : 'json',
+				success : function(jd) {
+					var content="";
+					for(var i=0;i<jd.length;i++){
+						var map=jd[i];
+						for(var key in map){
+							content+="<a href='javascript:clickQuery(\""+key+"\")'>"+key+"["+map[key]+"]</a><br/>";
+						}
+					};
+					$("#showDiv").html(content);
+				}
+			});
+		});
+		//点击任意地方 关闭分组结果显示
+		  $(document).click(function(){
+			  $('#showDiv').hide();
+		  });
+		
+		$("#searchBtn").click(
+				function() {
+					$.ajax({
+						url : 'searchFood',
+						data : 'keyWord=' + $("input[name='keyWord']").val(),
+						dataType : 'json',
+						success : function(jd) {
+							$("div[name='c']").remove();
+							for (var i = 0; i < jd.length; i++) {
+								var html = "<div name='c'>" + "   <h3>"
+										+ jd[i].foodName+"("+jd[i].typeName+")"+  "</h3> " + "<span>"
+										+ jd[i].foodName + "价格是：" + jd[i].price
+										+ "</span>" + "<hr>" + "</div>";
+								$("#foodDiv").append(html);
+							}
+						}
+					})
+				})
+	})
+</script>
+</head>
+<body>
+  <div>
+     <img  src="bd_logo1.png" width="280px" ><br/>
+     <input type="text" name="keyWord"  style="border:1px solid grey;width:200px;height:25px">
+     <input id="searchBtn" type="button" value="搜索一下"  style="background-color: rgb(51,133,255);color: white;border:0px;height:28px ">
+     <div id="foodDiv">
+     
+     </div>
+     
+     <div id="showDiv" style="position: absolute;width:200px;display: none;background-color: green">
+     </div>
+     
+  </div>
+</body>
+</html>
